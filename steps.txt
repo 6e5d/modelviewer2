@@ -1,0 +1,5 @@
+* show clear color only (no pipeline)
+* triangle (vertex data inside shader, no image/buffer creation)
+* add depthstencil, show 2 triangles
+* vertex/index buffer
+* projection/basic material
