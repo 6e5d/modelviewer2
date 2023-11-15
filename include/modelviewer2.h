@@ -13,13 +13,15 @@ typedef struct {
 	Camcon cc;
 	Wlezwrap wew;
 	Modelobj* model;
+
+	// controls
 	uint32_t index;
-	uint32_t width;
-	uint32_t height;
-	float px;
-	float py;
+	double px;
+	double py;
 	uint8_t mouse_state;
 	uint8_t playing; // 0: pause 1: play 2: step
+	uint32_t width;
+	uint32_t height;
 	bool quit;
 	bool resize;
 	bool drag;
