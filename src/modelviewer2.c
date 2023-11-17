@@ -18,85 +18,46 @@
 #include "../../wlezwrap/include/wlezwrap.h"
 #include "../include/modelviewer2.h"
 
-static void f_resize(void* data, uint32_t w, uint32_t h) {
-	Modelviewer2* mv = data;
+static void f_resize(Modelviewer2* mv, uint32_t w, uint32_t h) {
 	mv->width = w;
 	mv->height = h;
 	mv->resize = true;
 }
 
-static void f_quit(void* data) {
-	Modelviewer2* mv = data;
+static void f_quit(Modelviewer2* mv) {
 	mv->quit = true;
 }
 
-static void f_motion(void* data, double x, double y, double pressure) {
-	Modelviewer2* mv = data;
-	if (mv->mouse_state == 0) {
-		mv->drag = 0;
-		return;
-	}
-	if (!mv->drag) {
-		mv->px = x;
-		mv->py = y;
-		mv->drag = 1;
-		return;
-	}
-	if (mv->mouse_state == 10) {
+static void mview_event(WlezwrapMview* wewmv, double x, double y) {
+	Modelviewer2* mv = (Modelviewer2*)wewmv->data;
+	if (wewmv->button == 0) {
 		camcon_rotate(&mv->cc,
-			-3e-3f * (float)(x - mv->px),
-			3e-3f * (float)(y - mv->py)
+			-3e-3f * (float)(x - wewmv->px),
+			3e-3f * (float)(y - wewmv->py)
 		);
-	} else if (mv->mouse_state == 11) {
+	} else if (wewmv->button == 1) {
 		vec3 dp = {
-			1e-3f * (float)(x - mv->px) * mv->cc.r,
-			1e-3f * (float)(y - mv->py) * mv->cc.r,
+			1e-3f * (float)(x - wewmv->px) * mv->cc.r,
+			1e-3f * (float)(y - wewmv->py) * mv->cc.r,
 			0.0f,
 		};
 		camcon_translate(&mv->cc, dp);
-	} else if (mv->mouse_state == 12) {
+	} else if (wewmv->button == 2) {
 		vec3 dp = {
 			0.0f,
 			0.0f,
-			1e-3f * (float)(y - mv->py) * mv->cc.r,
+			1e-3f * (float)(y - wewmv->py) * mv->cc.r,
 		};
 		camcon_translate(&mv->cc, dp);
 	}
-	mv->px = x;
-	mv->py = y;
 }
 
-static void f_button(void* data, uint8_t button, bool state) {
-	Modelviewer2* mv = data;
-	if (!state) {
-		mv->mouse_state -= 10;
-	} else if (button == 1) {
-		if (mv->mouse_state == 1) {
-			mv->mouse_state = 11;
-		} else if (mv->mouse_state == 2) {
-			mv->mouse_state = 12;
-		} else {
-			mv->mouse_state = 10;
-		}
-	}
-}
-
-static void f_key(void* data, char ch, bool pressed) {
-	Modelviewer2* mv = data;
+static void f_key(Modelviewer2* mv, int8_t key, bool pressed) {
 	if (!pressed) {
-		if (ch < 0) {
-			mv->mouse_state = 0;
-		}
 		return;
 	}
 	vec3 dp = {0};
-	switch (ch) {
-	case -1:
-		mv->mouse_state = 1;
-		return;
-	case -2:
-		mv->mouse_state = 2;
-		return;
+	switch (key) {
 	case 'i':
 		mv->cc.r *= 0.9f;
 		break;
@@ -122,18 +83,32 @@ static void f_key(void* data, char ch, bool pressed) {
 	camcon_translate(&mv->cc, dp);
 }
 
+static void f_event(void* data, uint8_t type, WlezwrapEvent *e) {
+	Modelviewer2* mv = data;
+	wlezwrap_mview_update(&mv->mview, type, e);
+	switch(type) {
+	case 0:
+		f_quit(mv);
+		break;
+	case 1:
+		f_resize(mv, e->resize[0], e->resize[1]);
+		break;
+	case 3:
+		f_key(mv, e->key[0], (bool)e->key[1]);
+		break;
+	}
+}
+
 void modelviewer2_init(Modelviewer2* mv, Modelobj* model) {
 	mv->wew.data = (void*)mv;
 	wlezwrap_confgen(&mv->wew);
-	mv->wew.f_resize = f_resize;
-	mv->wew.f_quit = f_quit;
-	mv->wew.f_motion = f_motion;
-	mv->wew.f_button = f_button;
-	mv->wew.f_key = f_key;
+	mv->wew.event = f_event;
 	mv->resize = true; // swapchain has not been created
 	mv->width = 640;
 	mv->height = 480;
 	wlezwrap_init(&mv->wew);
+	mv->mview.event = mview_event;
+	mv->mview.data = mv;
 	camcon_init(&mv->cc);
 	vkwayland_new(&mv->vks, mv->wew.wl.display, mv->wew.wl.surface);
 	vkbasic_init(&mv->vb, mv->vks.device);

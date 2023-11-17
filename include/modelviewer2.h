@@ -5,6 +5,7 @@
 #include "../../modelobj/include/modelobj.h"
 #include "../../vkbasic3d/include/vkbasic3d.h"
 #include "../../wlezwrap/include/wlezwrap.h"
+#include "../../wlezwrap/include/mview.h"
 
 typedef struct {
 	Vkstatic vks;
@@ -16,15 +17,12 @@ typedef struct {
 
 	// controls
 	uint32_t index;
-	double px;
-	double py;
-	uint8_t mouse_state;
+	WlezwrapMview mview;
 	uint8_t playing; // 0: pause 1: play 2: step
 	uint32_t width;
 	uint32_t height;
 	bool quit;
 	bool resize;
-	bool drag;
 } Modelviewer2;
 
 void modelviewer2_init(Modelviewer2* mv, Modelobj* model);
