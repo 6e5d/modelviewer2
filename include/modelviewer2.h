@@ -3,6 +3,7 @@
 
 #include "../../camcon/include/camcon.h"
 #include "../../modelobj/include/modelobj.h"
+#include "../../vkbasic/include/vkbasic.h"
 #include "../../vkbasic3d/include/vkbasic3d.h"
 #include "../../wlezwrap/include/wlezwrap.h"
 #include "../../wlezwrap/include/mview.h"
