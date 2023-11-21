@@ -32,13 +32,13 @@ static void mview_event(WlezwrapMview* wewmv, double x, double y) {
 	Modelviewer2* mv = (Modelviewer2*)wewmv->data;
 	if (wewmv->button == 0) {
 		camcon_rotate(&mv->cc,
-			-3e-3f * (float)(x - wewmv->px),
-			3e-3f * (float)(y - wewmv->py)
+			-5e-3f * (float)(x - wewmv->px),
+			5e-3f * (float)(y - wewmv->py)
 		);
 	} else if (wewmv->button == 1) {
 		vec3 dp = {
-			1e-3f * (float)(x - wewmv->px) * mv->cc.r,
-			1e-3f * (float)(y - wewmv->py) * mv->cc.r,
+			-2e-3f * (float)(x - wewmv->px) * mv->cc.r,
+			-2e-3f * (float)(y - wewmv->py) * mv->cc.r,
 			0.0f,
 		};
 		camcon_translate(&mv->cc, dp);
@@ -46,7 +46,7 @@ static void mview_event(WlezwrapMview* wewmv, double x, double y) {
 		vec3 dp = {
 			0.0f,
 			0.0f,
-			1e-3f * (float)(y - wewmv->py) * mv->cc.r,
+			2e-3f * (float)(y - wewmv->py) * mv->cc.r,
 		};
 		camcon_translate(&mv->cc, dp);
 	}
@@ -60,9 +60,11 @@ static void f_key(Modelviewer2* mv, int8_t key, bool pressed) {
 	switch (key) {
 	case 'i':
 		mv->cc.r *= 0.9f;
+		printf("zoomin: %f\n", (double)mv->cc.r);
 		break;
 	case 'o':
 		mv->cc.r *= 1.1f;
+		printf("zoomout: %f\n", (double)mv->cc.r);
 		break;
 	case 'r':
 		camcon_init(&mv->cc);
@@ -143,7 +145,6 @@ void modelviewer2_go(Modelviewer2* mv) {
 		mv->index = 0;
 		mv->resize = false;
 		wl_surface_commit(mv->wew.wl.surface);
-		mv->vb3.recreate_pipeline = true;
 	}
 	vkbasic_next_index(&mv->vb, mv->vks.device, &mv->index);
 	float ratio = (float)width / (float)height;
