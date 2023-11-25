@@ -5,3 +5,4 @@ vkwayland
 modelobj
 camcon
 shapematch
+vkstatic

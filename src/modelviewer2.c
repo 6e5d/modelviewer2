@@ -28,31 +28,32 @@ static void f_quit(Modelviewer2* mv) {
 	mv->quit = true;
 }
 
-static void mview_event(WlezwrapMview* wewmv, double x, double y) {
-	Modelviewer2* mv = (Modelviewer2*)wewmv->data;
-	if (wewmv->button == 0) {
+static void motion(Modelviewer2 *mv, bool *keystate,
+	float x, float y, float px, float py
+) {
+	if (keystate[WLEZWRAP_LSHIFT]) {
+		vec3 dp = {
+			-2e-3f * (float)(x - px) * mv->cc.r,
+			-2e-3f * (float)(y - py) * mv->cc.r,
+			0.0f,
+		};
+		camcon_translate(&mv->cc, dp);
+	} else if (keystate[WLEZWRAP_LCTRL]) {
+		vec3 dp = {
+			0.0f,
+			0.0f,
+			2e-3f * (float)(y - py) * mv->cc.r,
+		};
+		camcon_translate(&mv->cc, dp);
+	} else {
 		camcon_rotate(&mv->cc,
-			-5e-3f * (float)(x - wewmv->px),
-			5e-3f * (float)(y - wewmv->py)
+			-5e-3f * (float)(x - px),
+			5e-3f * (float)(y - py)
 		);
-	} else if (wewmv->button == 1) {
-		vec3 dp = {
-			-2e-3f * (float)(x - wewmv->px) * mv->cc.r,
-			-2e-3f * (float)(y - wewmv->py) * mv->cc.r,
-			0.0f,
-		};
-		camcon_translate(&mv->cc, dp);
-	} else if (wewmv->button == 2) {
-		vec3 dp = {
-			0.0f,
-			0.0f,
-			2e-3f * (float)(y - wewmv->py) * mv->cc.r,
-		};
-		camcon_translate(&mv->cc, dp);
 	}
 }
 
-static void f_key(Modelviewer2* mv, int8_t key, bool pressed) {
+static void f_key(Modelviewer2* mv, uint8_t key, bool pressed) {
 	if (!pressed) {
 		return;
 	}
@@ -86,8 +87,8 @@ static void f_key(Modelviewer2* mv, int8_t key, bool pressed) {
 }
 
 static void f_event(void* data, uint8_t type, WlezwrapEvent *e) {
+	static float px, py;
 	Modelviewer2* mv = data;
-	wlezwrap_mview_update(&mv->mview, type, e);
 	switch(type) {
 	case 0:
 		f_quit(mv);
@@ -95,6 +96,15 @@ static void f_event(void* data, uint8_t type, WlezwrapEvent *e) {
 	case 1:
 		f_resize(mv, e->resize[0], e->resize[1]);
 		break;
+	case 2: {
+		float x = e->motion[0];
+		float y = e->motion[1];
+		if (mv->wew.keystate[WLEZWRAP_MCLICK]) {
+			motion(mv, mv->wew.keystate, x, y, px, py);
+		}
+		px = x; py = y;
+		break;
+	}
 	case 3:
 		f_key(mv, e->key[0], (bool)e->key[1]);
 		break;
@@ -108,9 +118,8 @@ void modelviewer2_init(Modelviewer2* mv, Modelobj* model) {
 	mv->resize = true; // swapchain has not been created
 	mv->width = 640;
 	mv->height = 480;
+	mv->present = false;
 	wlezwrap_init(&mv->wew);
-	mv->mview.event = mview_event;
-	mv->mview.data = mv;
 	camcon_init(&mv->cc);
 	vkwayland_new(&mv->vks, mv->wew.wl.display, mv->wew.wl.surface);
 	vkbasic_init(&mv->vb, mv->vks.device);
@@ -131,12 +140,19 @@ bool modelviewer2_playing(Modelviewer2* mv) {
 	return true;
 }
 
+static void modelviewer2_present(Modelviewer2* mv) {
+	if (!mv->present) { return; }
+	vkbasic_present(&mv->vb, mv->vks.queue, &mv->index);
+	mv->present = false;
+}
+
 void modelviewer2_go(Modelviewer2* mv) {
 	vkbasic3d_model_upload(&mv->vks, &mv->vb3, mv->model);
 	uint32_t width = mv->width;
 	uint32_t height = mv->height;
 	if (width == 0) { width = 1; }
 	if (height == 0) { height = 1; }
+	wl_display_dispatch_pending(mv->wew.wl.display);
 	if (mv->resize) {
 		printf("Resize: %u %u\n", width, height);
 		assert(0 == vkDeviceWaitIdle(mv->vks.device));
@@ -146,14 +162,16 @@ void modelviewer2_go(Modelviewer2* mv) {
 		mv->resize = false;
 		wl_surface_commit(mv->wew.wl.surface);
 	}
-	vkbasic_next_index(&mv->vb, mv->vks.device, &mv->index);
 	float ratio = (float)width / (float)height;
 	glm_perspective(0.7f, ratio, 0.05f, 100.0f, mv->vb3.camera->proj);
 	camcon_compute(&mv->cc, mv->vb3.camera->view);
 	camcon_lookn(&mv->cc, mv->vb3.camera->direction);
+	vkbasic_next_index(&mv->vb, mv->vks.device, &mv->index);
 	vkbasic3d_build_command(&mv->vb3, &mv->vks, mv->vks.cbuf,
 		mv->vb.vs.elements[mv->index].framebuffer, width, height);
-	vkbasic_present(&mv->vb, mv->vks.queue, mv->vks.cbuf, &mv->index);
+	vkbasic_submit(&mv->vb, mv->vks.queue, mv->vks.cbuf, &mv->index);
+	mv->present = true;
+	modelviewer2_present(mv);
 	wl_display_roundtrip(mv->wew.wl.display);
 }
 
