@@ -13,6 +13,7 @@
 #include "../../vkbasic/include/vkbasic.h"
 #include "../../vkbasic3d/include/model.h"
 #include "../../vkbasic3d/include/vkbasic3d.h"
+#include "../../vkstatic/include/oneshot.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../../vkwayland/include/vkwayland.h"
 #include "../../wlezwrap/include/wlezwrap.h"
@@ -167,9 +168,10 @@ void modelviewer2_go(Modelviewer2* mv) {
 	camcon_compute(&mv->cc, mv->vb3.camera->view);
 	camcon_lookn(&mv->cc, mv->vb3.camera->direction);
 	vkbasic_next_index(&mv->vb, mv->vks.device, &mv->index);
-	vkbasic3d_build_command(&mv->vb3, &mv->vks, mv->vks.cbuf,
+	VkCommandBuffer cbuf = vkstatic_begin(&mv->vks);
+	vkbasic3d_build_command(&mv->vb3, &mv->vks, cbuf,
 		mv->vb.vs.elements[mv->index].framebuffer, width, height);
-	vkbasic_submit(&mv->vb, mv->vks.queue, mv->vks.cbuf, &mv->index);
+	vkbasic_submit(&mv->vb, mv->vks.queue, cbuf, &mv->index);
 	mv->present = true;
 	modelviewer2_present(mv);
 	wl_display_roundtrip(mv->wew.wl.display);
