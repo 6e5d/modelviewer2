@@ -2,6 +2,7 @@
 #include <cglm/cglm.h>
 #include <unistd.h>
 
+#include "../../chrono/include/chrono.h"
 #include "../../modelobj/include/transform.h"
 #include "../../shapematch/include/model.h"
 #include "../include/modelviewer2.h"
@@ -24,7 +25,7 @@ int main(int argc, char** argv) {
 			shapematch_step(&sm);
 		}
 		modelviewer2_go(&mv);
-		usleep(10000);
+		chrono_sleep(10000000);
 	}
 
 	shapematch_deinit(&sm);
