@@ -13,7 +13,6 @@
 #include "../../vkbasic/include/vkbasic.h"
 #include "../../vkbasic3d/include/model.h"
 #include "../../vkbasic3d/include/vkbasic3d.h"
-#include "../../vkstatic/include/oneshot.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../../vkwayland/include/vkwayland.h"
 #include "../../wlezwrap/include/wlezwrap.h"
