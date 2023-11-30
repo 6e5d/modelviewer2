@@ -1,10 +1,9 @@
-#include <assert.h>
 #include <cglm/cglm.h>
 #include <unistd.h>
 
 #include "../../chrono/include/chrono.h"
-#include "../../modelobj/include/transform.h"
-#include "../../shapematch/include/model.h"
+#include "../../modelobj/include/modelobj.h"
+#include "../../shapematch/include/shapematch.h"
 #include "../include/modelviewer2.h"
 
 int main(int argc, char** argv) {

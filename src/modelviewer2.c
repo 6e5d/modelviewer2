@@ -1,17 +1,11 @@
-#include <assert.h>
 #include <cglm/cglm.h>
 #include <math.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <vulkan/vulkan.h>
 #include <wayland-client.h>
 
 #include "../../camcon/include/camcon.h"
 #include "../../modelobj/include/modelobj.h"
-#include "../../modelobj/include/normal.h"
 #include "../../vkbasic/include/vkbasic.h"
-#include "../../vkbasic3d/include/model.h"
 #include "../../vkbasic3d/include/vkbasic3d.h"
 #include "../../vkstatic/include/vkstatic.h"
 #include "../../vkwayland/include/vkwayland.h"

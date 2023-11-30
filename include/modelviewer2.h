@@ -1,5 +1,5 @@
-#ifndef INCLUDEGUARD_MODELVIEWER2_MODELVIEWER2H
-#define INCLUDEGUARD_MODELVIEWER2_MODELVIEWER2H
+#ifndef INCLUDEGUARD_MODELVIEWER2
+#define INCLUDEGUARD_MODELVIEWER2
 
 #include "../../camcon/include/camcon.h"
 #include "../../modelobj/include/modelobj.h"
