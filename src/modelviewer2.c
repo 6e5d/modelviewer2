@@ -164,7 +164,7 @@ void modelviewer2_go(Modelviewer2* mv) {
 	VkCommandBuffer cbuf = vkstatic_begin(&mv->vks);
 	vkbasic3d_build_command(&mv->vb3, &mv->vks, cbuf,
 		mv->vb.vs.elements[mv->index].framebuffer, width, height);
-	vkbasic_submit(&mv->vb, mv->vks.queue, cbuf, &mv->index);
+	vkbasic_submit(&mv->vb, mv->vks.queue, cbuf);
 	mv->present = true;
 	modelviewer2_present(mv);
 	wl_display_roundtrip(mv->wew.wl.display);
@@ -173,7 +173,7 @@ void modelviewer2_go(Modelviewer2* mv) {
 void modelviewer2_deinit(Modelviewer2* mv) {
 	assert(0 == vkDeviceWaitIdle(mv->vks.device));
 	vkbasic3d_deinit(&mv->vb3, mv->vks.device);
-	vkbasic_deinit(&mv->vb, mv->vks.device, mv->vks.cpool);
+	vkbasic_deinit(&mv->vb, mv->vks.device);
 	vkstatic_deinit(&mv->vks);
 	wlezwrap_deinit(&mv->wew);
 }
