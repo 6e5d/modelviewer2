@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 			shapematch_step(&sm);
 		}
 		modelviewer2_go(&mv);
-		chrono_sleep(10000000);
+		com_6e5d_chrono_sleep(10000000);
 	}
 
 	shapematch_deinit(&sm);
