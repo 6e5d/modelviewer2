@@ -1,8 +1,8 @@
 #ifndef INCLUDEGUARD_MODELVIEWER2
 #define INCLUDEGUARD_MODELVIEWER2
 
-#include "../../camcon/include/camcon.h"
-#include "../../modelobj/include/modelobj.h"
+#include "../../camcon/build/camcon.h"
+#include "../../modelobj/build/modelobj.h"
 #include "../../vkbasic/include/vkbasic.h"
 #include "../../vkbasic3d/include/vkbasic3d.h"
 #include "../../wlezwrap/include/wlezwrap.h"
@@ -11,9 +11,9 @@ typedef struct {
 	Vkstatic vks;
 	Vkbasic vb;
 	Vkbasic3d vb3;
-	Camcon cc;
+	Camcon() cc;
 	Wlezwrap wew;
-	Modelobj* model;
+	Com_6e5dModelobj* model;
 
 	// controls
 	uint32_t index;
@@ -25,7 +25,7 @@ typedef struct {
 	bool present;
 } Modelviewer2;
 
-void modelviewer2_init(Modelviewer2* mv, Modelobj* model);
+void modelviewer2_init(Modelviewer2* mv, Com_6e5dModelobj* model);
 bool modelviewer2_playing(Modelviewer2* mv);
 void modelviewer2_go(Modelviewer2* mv);
 void modelviewer2_deinit(Modelviewer2* mv);
